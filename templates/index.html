@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>呼び鈴システム</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        function updateNumbers() {
+            fetch('/get_numbers')
+                .then(response => response.json())
+                .then(data => {
+                    const list = document.getElementById('number-list');
+                    list.innerHTML = '';
+                    data.forEach(entry => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `番号: ${entry.number}, 理由: ${entry.reason}`;
+                        list.appendChild(listItem);
+                    });
+                });
+        }
+
+        setInterval(updateNumbers, 5000);  // 5秒ごとにリストを更新
+        window.onload = updateNumbers;
+    </script>
+</head>
+<body>
+    <header>
+        <h1>呼び鈴システム</h1>
+    </header>
+    <ul id="number-list">
+        <!-- JavaScriptによってリストが更新されます -->
+    </ul>
+</body>
+</html>

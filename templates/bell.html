@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>呼び鈴</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>呼ぶ</h1>
+    </header>
+    <form action="{{ url_for('confirm_call') }}" method="post">
+        <input type="hidden" name="number" value="{{ number }}">
+        <p>理由を選択してください:</p>
+        {% for reason in reasons %}
+            <button type="submit" name="reason" value="{{ reason }}">{{ reason }}</button>
+        {% endfor %}
+    </form>
+</body>
+</html>
