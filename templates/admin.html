@@ -2,38 +2,177 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>呼び鈴管理</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script>
-        function updateNumbers() {
-            fetch('/get_numbers')
-                .then(response => response.json())
-                .then(data => {
-                    const list = document.getElementById('number-list');
-                    list.innerHTML = '';
-                    data.forEach(entry => {
-                        const listItem = document.createElement('li');
-                        listItem.innerHTML = `番号: ${entry.number}, 理由: ${entry.reason}
-                            <form action="/clear/${entry.number}" method="post" style="display:inline;">
-                                <input type="hidden" name="token" value="${document.getElementById('token').value}">
-                                <button type="submit">完了</button>
-                            </form>`;
-                        list.appendChild(listItem);
-                    });
-                });
+    <title>管理者画面</title>
+    <style>
+        .completed { background-color: red; }
+        .incomplete { background-color: white; }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="../static/style.css">
+        <script>
+        function loadMobileCSS() {
+            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                var link = document.createElement("link");
+                link.rel = "stylesheet";
+                link.type = "text/css";
+                link.href = "../static/mobile.css"; // モバイル用の追加CSSファイルを指定
+                document.getElementsByTagName("head")[0].appendChild(link);
+            }
         }
 
-        setInterval(updateNumbers, 5000);  // 5秒ごとにリストを更新
-        window.onload = updateNumbers;
+        document.addEventListener("DOMContentLoaded", loadMobileCSS);
     </script>
 </head>
 <body>
-    <header>
-        <h1>呼び鈴管理</h1>
+<header>
+    <h1>進捗管理システム</h1>
     </header>
-    <input type="hidden" id="token" value="{{ token }}">
-    <ul id="number-list">
-        <!-- JavaScriptによってリストが更新されます -->
-    </ul>
+
+<div class="container">
+
+    <table border="1" id="progress-table">
+        <tr>
+            <th>タスク/班</th>
+            {% for group_id in range(1, num_groups + 1) %}
+            <th>班 {{ group_id }}</th>
+            {% endfor %}
+        </tr>
+        {% for task_index in range(tasks | length) %}
+        <tr>
+            <th>{{ tasks[task_index] }}</th>
+            {% for group_id in range(1, num_groups + 1) %}
+            <td id="group-{{ group_id }}-task-{{ task_index }}" class="{{ 'completed' if data.get(group_id, {}).get(tasks[task_index], '未完了') != '未完了' else 'incomplete' }}">
+                {{ data.get(group_id, {}).get(tasks[task_index], '') }}
+                {% if data.get(group_id, {}).get(tasks[task_index], '未完了') != '未完了' %}
+                <button class="revert-btn" data-group="{{ group_id }}" data-task="{{ tasks[task_index] }}"></button>
+                {% endif %}
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+    <div class="container">
+    <h2>呼び出しリクエスト</h2>
+
+    <button id="mute-button">🔇</button>
+    <div id="call-requests">
+        {% for request in call_requests %}
+        <p>班 {{ request.group_id }}: {{ request.reason }} <button class="complete-call-btn" data-group="{{ request.group_id }}" data-reason="{{ request.reason }}">完了</button></p>
+        {% endfor %}
+    </div>
+    </div>
+    <audio id="notification-sound" src="{{ url_for('serve_audio', filename='notification.mp3') }}" preload="auto" muted></audio>
+    <script>
+        var previousCallRequests = {{ call_requests | tojson }};
+        var audioElement = document.getElementById('notification-sound');
+        var muteButton = document.getElementById('mute-button');
+
+        muteButton.addEventListener('click', function() {
+            audioElement.muted = !audioElement.muted;
+            muteButton.textContent = audioElement.muted ? '🔇' : '🔈';
+        });
+         fetchProgressData()
+        function fetchProgressData() {
+            $.ajax({
+                url: "{{ url_for('get_progress') }}",
+                method: "GET",
+                success: function(data) {
+                    const tasks = {{ tasks | tojson }};
+                    for (let group_id = 1; group_id <= {{ num_groups }}; group_id++) {
+                        tasks.forEach((task, task_index) => {
+                            const cellId = `#group-${group_id}-task-${task_index}`;
+                            const status = data[group_id] && data[group_id][task] ? data[group_id][task] : "未完了";
+                            $(cellId).html(`${status !== "未完了" ? `<!--<button class="revert-btn" data-group="${group_id}" data-task="${task}"></button>-->` : ''}`);
+                            if (status !== "未完了") {
+                                $(cellId).removeClass("incomplete").addClass("completed");
+                            } else {
+                                $(cellId).removeClass("completed").addClass("incomplete");
+                            }
+                        });
+                    }
+                    attachRevertEventHandlers();
+                }
+            });
+        }
+
+        function fetchCallRequests() {
+            $.ajax({
+                url: "{{ url_for('get_call_requests') }}",
+                method: "GET",
+                success: function(data) {
+                    const callRequestsDiv = $("#call-requests");
+                    callRequestsDiv.empty();
+                    let newRequests = false;
+                    data.forEach(request => {
+                        callRequestsDiv.append(`<p>班 ${request.group_id}: ${request.reason} <button class="complete-call-btn" data-group="${request.group_id}" data-reason="${request.reason}">完了</button></p>`);
+                        const previousRequest = previousCallRequests.find(r => r.group_id === request.group_id && r.reason === request.reason);
+                        if (!previousRequest) {
+                            newRequests = true;
+                        }
+                    });
+                    if (newRequests) {
+                        audioElement.play();
+                    }
+                    previousCallRequests = data;
+                    attachCompleteCallEventHandlers();
+                }
+            });
+        }
+
+        function attachRevertEventHandlers() {
+            $('.revert-btn').off('click').on('click', function() {
+                const group_id = $(this).data('group');
+                const task = $(this).data('task');
+                $.ajax({
+                    url: "{{ url_for('update_progress') }}",
+                    method: "POST",
+                    data: {
+                        group_id: group_id,
+                        task: task,
+                        status: "未完了",
+                        token: "{{ token }}"
+                    },
+                    success: function() {
+                        fetchProgressData();
+                    }
+                });
+            });
+        }
+
+        function attachCompleteCallEventHandlers() {
+            $('.complete-call-btn').off('click').on('click', function() {
+                const group_id = $(this).data('group');
+                const reason = $(this).data('reason');
+                $.ajax({
+                    url: "{{ url_for('complete_call_request') }}",
+                    method: "POST",
+                    data: {
+                        group_id: group_id,
+                        reason: reason,
+                        token: "{{ token }}"
+                    },
+                    success: function() {
+                        fetchCallRequests();
+                    }
+                });
+            });
+        }
+
+        $(document).ready(function() {
+            // ユーザーのインタラクションを待つ
+            $(document).on('click keypress', function() {
+                audioElement.play().then(() => {
+                    audioElement.pause();
+                    audioElement.currentTime = 0;
+                }).catch(error => {
+                    console.log('Failed to play audio:', error);
+                });
+            });
+
+            setInterval(fetchProgressData, 500);
+            setInterval(fetchCallRequests, 500);
+        });
+    </script>
 </body>
 </html>

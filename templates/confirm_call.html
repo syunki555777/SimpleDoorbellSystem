@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>進捗管理システム</title>
-    <link rel="stylesheet" href="../static/style.css">
+    <title>呼び出し確認</title>
+    <link rel="stylesheet" href="../../static/style.css">
         <script>
         function loadMobileCSS() {
             if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
@@ -20,10 +20,16 @@
 </head>
 <body>
 <header>
-    <h1>進捗管理システム</h1>
-</header>
+    <h1>呼び出し確認</h1>
+    </header>
 <div class="container">
-    <p>班ごとの進捗を管理します。</p>
+    <p>班 {{ group_id }} からの呼び出し理由: {{ reason }}<br>上記の内容で呼び出します。</p>
+    <form method="POST" action="{{ url_for('confirm_call', group_id=group_id, reason=reason, token=token) }}">
+        <input type="hidden" name="call" value="true">
+        <input type="hidden" name="token" value="{{ token }}">
+        <button type="submit">呼び出す</button>
+    </form>
+    <a href="{{ url_for('group_progress', group_id=group_id, token=token) }}">戻る</a>
     </div>
 </body>
 </html>

@@ -2,25 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>呼び出し確認</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>確認画面</title>
+    <link rel="stylesheet" href="../../static/style.css">
+        <script>
+        function loadMobileCSS() {
+            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                var link = document.createElement("link");
+                link.rel = "stylesheet";
+                link.type = "text/css";
+                link.href = "../static/mobile.css"; // モバイル用の追加CSSファイルを指定
+                document.getElementsByTagName("head")[0].appendChild(link);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", loadMobileCSS);
+    </script>
 </head>
 <body>
-    <header>
-        <h1>呼び出し確認</h1>
+<header>
+    <h1>確認画面</h1>
     </header>
     <div class="container">
-        <p>以下の項目で呼び出してもいいですか?</p>
-        <p>{{ number }} 班</p>
-        <p>理由: {{ reason }}</p>
-        <form action="{{ url_for('call_bell') }}" method="post">
-            <input type="hidden" name="number" value="{{ number }}">
-            <input type="hidden" name="reason" value="{{ reason }}">
-            <button type="submit">はい</button>
-        </form>
-        <form action="{{ url_for('index') }}" method="get">
-            <button class="red" type="submit">いいえ</button>
-        </form>
+    <p>班 {{ group_id }} の {{ task }} が完了しました。</br> 上記の内容を送信します</p>
+    <form method="POST" action="{{ url_for('confirm_task', group_id=group_id, task=task, token=token) }}">
+        <button type="submit">送信</button>
+    </form>
+    <a href="{{ url_for('group_progress', group_id=group_id, token=token) }}">戻る</a>
     </div>
 </body>
 </html>

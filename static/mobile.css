@@ -1,0 +1,29 @@
+ h1 {
+        font-size: 32px; /* より大きなフォントサイズ */
+    }
+
+    label {
+        font-size: 26px; /* より大きなフォントサイズ */
+    }
+
+    select, input[type="number"] {
+        font-size: 24px; /* より大きなフォントサイズ */
+        padding: 14px; /* より大きなパディング */
+        max-width: 100%;
+    }
+
+    button {
+        font-size: 24px; /* より大きなフォントサイズ */
+        padding: 14px 28px; /* より大きなパディング */
+        margin: 14px;
+    }
+
+    th, td {
+        padding: 18px; /* より大きなパディング */
+        font-size: 20px; /* より大きなフォントサイズ */
+    }
+
+    li {
+        padding: 24px; /* より大きなパディング */
+        font-size: 20px; /* より大きなフォントサイズ */
+    }

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>班 {{ group_id }} の進捗</title>
+    <link rel="stylesheet" href="../static/style.css">
+        <script>
+        function loadMobileCSS() {
+            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                var link = document.createElement("link");
+                link.rel = "stylesheet";
+                link.type = "text/css";
+                link.href = "../static/mobile.css"; // モバイル用の追加CSSファイルを指定
+                document.getElementsByTagName("head")[0].appendChild(link);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", loadMobileCSS);
+    </script>
+</head>
+<body>
+<header>
+    <h1>班 {{ group_id }} の進捗</h1>
+    </header>
+    <div class="container">
+    <h2>進捗更新</h2>
+    {% for task in tasks %}
+    <form method="POST" action="{{ url_for('group_progress', group_id=group_id, token=token) }}">
+        <input type="hidden" name="task" value="{{ task }}">
+        <button type="submit">{{ task }}が完了</button>
+    </form>
+    {% endfor %}
+
+        </div>
+    <div class="container">
+    <h2>呼び出し</h2>
+    {% for reason in call_reasons %}
+    <form method="GET" action="{{ url_for('confirm_call', group_id=group_id, reason=reason) }}">
+        <input type="hidden" name="token" value="{{ token }}">
+        <button type="submit">{{ reason }}</button>
+    </form>
+    {% endfor %}
+
+    </div>
+</body>
+</html>
