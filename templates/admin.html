@@ -83,7 +83,7 @@
                         tasks.forEach((task, task_index) => {
                             const cellId = `#group-${group_id}-task-${task_index}`;
                             const status = data[group_id] && data[group_id][task] ? data[group_id][task] : "未完了";
-                            $(cellId).html(`${status !== "未完了" ? `<!--<button class="revert-btn" data-group="${group_id}" data-task="${task}"></button>-->` : ''}`);
+                            $(cellId).html(`${status !== "未完了" ? `<div class="revert-btn" data-group="${group_id}" data-task="${task}">x</div>` : ''}`);
                             if (status !== "未完了") {
                                 $(cellId).removeClass("incomplete").addClass("completed");
                             } else {
@@ -154,6 +154,7 @@
                     },
                     success: function() {
                         fetchCallRequests();
+                        fetchProgressData();
                     }
                 });
             });

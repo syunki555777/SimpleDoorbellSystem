@@ -139,10 +139,24 @@ tr:hover {
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
+
+}
+
+.revert-btn{
+    background-color: red;
+    height: 100%;
+    width:100%;
+    color:red;
+}
+
+td{
+    margin:0;
+    padding: 0;
 }
 
 .revert-btn:hover, .complete-call-btn:hover {
     background-color: #d32f2f; /* Darker Red */
+    cursor: pointer /* ポインターを表示 */ !important;
 }
 
 /* スマートフォン用のスタイル調整 */
