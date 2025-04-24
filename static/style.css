@@ -145,6 +145,7 @@ tr:hover {
 .revert-btn{
     background-color: red;
     height: 100%;
+    font-size: 2em;
     width:100%;
     color:red;
 }

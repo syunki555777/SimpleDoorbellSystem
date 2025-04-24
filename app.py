@@ -10,6 +10,9 @@ SECRET_TOKEN = "ADMIN"
 # 呼び出し側向けトークン(共通) ここを変更してください。
 STUDENT_TOKEN = "STUDENT"
 
+# 外部API用トークン　ここを変更してください。
+REMOTE_TOKEN = "REMOTE"
+
 # 班ごとの進捗を保存する辞書
 progress_data = {}
 
@@ -64,6 +67,56 @@ def confirm_call(group_id, reason):
         call_requests.append({"group_id": group_id, "reason": reason})
         return redirect(url_for('group_progress', group_id=group_id, token=token))
     return render_template('confirm_call.html', group_id=group_id, reason=reason, token=token)
+
+# --- API call (Tokenの設定が必要です。)
+
+#callを指定する。
+@app.route('/api/call/<int:group_id>/<reason>', methods=['GET', 'POST'])
+def remote_call(group_id, reason):
+    token = request.args.get('token')
+    if token != REMOTE_TOKEN:
+        return jsonify({"error": "Forbidden", "message": "Invalid token."}), 403
+    if request.method == 'POST':
+        call_requests.append({"group_id": group_id, "reason": reason})
+    return jsonify({"status": "OK"})
+
+#次のタスクを完了させる。
+@app.route('/api/task/<int:group_id>', methods=['POST'])
+def complete_next_task(group_id):
+    token = request.args.get('token')
+    if token != REMOTE_TOKEN:
+        # トークンが無効な場合、JSON形式でエラーを返す
+        return jsonify({"error": "Forbidden", "message": "Invalid token."}), 403
+
+    # group_id の進捗データを取得（無ければ初期化）
+    progress = progress_data.get(group_id, {})
+
+    # 次の未完了タスクを取得
+    next_tasks = [task for task in TASKS if progress.get(task) != "済み"]
+
+    if not next_tasks:
+        # 全タスクが完了済みの場合
+        return jsonify({
+            "status": "completed",
+            "message": "All tasks for this group are already completed.",
+            "group_id": group_id,
+        })
+
+    # 次のタスクを完了状態に更新
+    next_task = next_tasks[0]
+    if group_id not in progress_data:
+        progress_data[group_id] = {}
+    progress_data[group_id][next_task] = "済み"
+
+    # 更新されたデータをJSON形式で返す
+    return jsonify({
+        "status": "success",
+        "group_id": group_id,
+        "completed_task": next_task,
+        "remaining_tasks": [task for task in TASKS if progress_data[group_id].get(task) != "済み"]
+    })
+
+
 
 @app.route('/admin', methods=['GET'])
 def admin():
