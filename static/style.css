@@ -160,6 +160,17 @@ td{
     cursor: pointer /* ポインターを表示 */ !important;
 }
 
+footer {
+    color: rgba(0,0,0,.2);           /* テキストも落ち着いたグレー */
+    text-align: center;       /* テキストを中央揃え */
+    padding: 10px 0;          /* 上下の余白を10px */
+    font-size: 0.9em;
+    position: fixed;          /* フッターを画面の下部に固定 */
+    bottom: 0;                /* 下端に固定 */
+    left: 0;                  /* 左端に固定 */
+    width: 100%;              /* ページ幅いっぱいに表示 */
+}
+
 /* スマートフォン用のスタイル調整 */
 @media (max-width: 768px) {
     h1 {

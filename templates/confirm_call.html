@@ -23,7 +23,7 @@
     <h1>呼び出し確認</h1>
     </header>
 <div class="container">
-    <p>班 {{ group_id }} からの呼び出し理由: {{ reason }}<br>上記の内容で呼び出します。</p>
+    <p>{{ group_id }} 班 からの呼び出し理由: {{ reason }}<br>上記の内容で呼び出します。</p>
     <form method="POST" action="{{ url_for('confirm_call', group_id=group_id, reason=reason, token=token) }}">
         <input type="hidden" name="call" value="true">
         <input type="hidden" name="token" value="{{ token }}">
@@ -31,5 +31,8 @@
     </form>
     <a href="{{ url_for('group_progress', group_id=group_id, token=token) }}">戻る</a>
     </div>
+    <footer>
+    <p>&copy; 2024-2025 Kogakuin 情報学実験 鈴木 舜基 All Rights Reserved.</p>
+    </footer>
 </body>
 </html>

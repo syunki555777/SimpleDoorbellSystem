@@ -13,6 +13,8 @@ STUDENT_TOKEN = "STUDENT"
 # 外部API用トークン　ここを変更してください。
 REMOTE_TOKEN = "REMOTE"
 
+title = "進捗管理システム"
+
 # 班ごとの進捗を保存する辞書
 progress_data = {}
 
@@ -164,7 +166,7 @@ def admin():
     token = request.args.get('token')
     if token != SECRET_TOKEN:
         abort(403)  # Forbidden
-    return render_template('admin.html', data=progress_data, tasks=TASKS, num_groups=NUMBER_OF_GROUPS, call_requests=call_requests, token=token)
+    return render_template('admin.html', data=progress_data, tasks=TASKS, num_groups=NUMBER_OF_GROUPS, call_requests=call_requests, token=token,title=title)
 
 @app.route('/update_progress', methods=['POST'])
 def update_progress():
