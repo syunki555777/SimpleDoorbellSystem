@@ -116,6 +116,47 @@ def complete_next_task(group_id):
         "remaining_tasks": [task for task in TASKS if progress_data[group_id].get(task) != "済み"]
     })
 
+#タスクを取り消す(未完了に変更)
+@app.route('/api/task/<int:group_id>/undo', methods=['POST'])
+def undo_last_completed_task(group_id):
+    token = request.args.get('token')
+    if token != REMOTE_TOKEN:
+        # トークンが無効な場合、JSON形式でエラーを返す
+        return jsonify({"error": "Forbidden", "message": "Invalid token."}), 403
+
+    # group_id の進捗データを取得
+    progress = progress_data.get(group_id, {})
+    if not progress:
+        # 進捗データが存在しない場合
+        return jsonify({
+            "status": "error",
+            "message": "No progress data found for this group.",
+            "group_id": group_id
+        })
+
+    # 完了済みのタスクを逆順で取得
+    completed_tasks = [task for task in reversed(TASKS) if progress.get(task) == "済み"]
+
+    if not completed_tasks:
+        # 完了済みタスクがない場合
+        return jsonify({
+            "status": "error",
+            "message": "No completed tasks to undo.",
+            "group_id": group_id
+        })
+
+    # 最後の完了済みタスクを未完了に戻す
+    last_task = completed_tasks[0]
+    progress_data[group_id][last_task] = "未完了"
+
+    return jsonify({
+        "status": "success",
+        "group_id": group_id,
+        "undone_task": last_task,
+        "remaining_tasks": [task for task in TASKS if progress_data[group_id].get(task) != "済み"],
+        "completed_tasks": [task for task in TASKS if progress_data[group_id].get(task) == "済み"]
+    })
+
 
 
 @app.route('/admin', methods=['GET'])

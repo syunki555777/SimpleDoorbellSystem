@@ -82,16 +82,24 @@
                     for (let group_id = 1; group_id <= {{ num_groups }}; group_id++) {
                         tasks.forEach((task, task_index) => {
                             const cellId = `#group-${group_id}-task-${task_index}`;
+                            const cellElement = $(cellId);
+                            const currentHtml = cellElement.html(); // 現在のHTMLを取得
+
                             const status = data[group_id] && data[group_id][task] ? data[group_id][task] : "未完了";
-                            $(cellId).html(`${status !== "未完了" ? `<div class="revert-btn" data-group="${group_id}" data-task="${task}">x</div>` : ''}`);
-                            if (status !== "未完了") {
-                                $(cellId).removeClass("incomplete").addClass("completed");
-                            } else {
-                                $(cellId).removeClass("completed").addClass("incomplete");
+                            const newHtml = status !== "未完了" ? `<div class="revert-btn" data-group="${group_id}" data-task="${task}">x</div>` : '';
+
+                            // 更新が必要かどうかを確認
+                            if (currentHtml.trim() !== newHtml.trim()) {
+                                cellElement.html(newHtml); // 必要時にのみHTML書き換えを実行
+                                if (status !== "未完了") {
+                                    cellElement.removeClass("incomplete").addClass("completed");
+                                } else {
+                                    cellElement.removeClass("completed").addClass("incomplete");
+                                }
                             }
                         });
                     }
-                    attachRevertEventHandlers();
+                    attachRevertEventHandlers(); // 必須イベントを再バインド
                 }
             });
         }
