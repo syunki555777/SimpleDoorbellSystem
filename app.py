@@ -1,32 +1,23 @@
 from flask import Flask, render_template, request, redirect, url_for, abort, jsonify, send_from_directory
 import os
 import json
-
+import config  # config.py をインポート
 app = Flask(__name__)
 
-# 管理者向けトークン ここを変更してください。
-SECRET_TOKEN = "ADMIN"
+# 設定を読み込む
+app.config.from_object(config)
 
-# 呼び出し側向けトークン(共通) ここを変更してください。
-STUDENT_TOKEN = "STUDENT"
+# 必要な変数は Flask の `app.config` から参照する
+title = app.config["TITLE"]
+progress_data = app.config["PROGRESS_DATA"]
+call_requests = app.config["CALL_REQUESTS"]
+NUMBER_OF_GROUPS = app.config["NUMBER_OF_GROUPS"]
+TASKS = app.config["TASKS"]
+CALL_REASONS = app.config["CALL_REASONS"]
 
-# 外部API用トークン　ここを変更してください。
-REMOTE_TOKEN = "REMOTE"
-
-title = "進捗管理システム"
-
-# 班ごとの進捗を保存する辞書
-progress_data = {}
-
-# 班ごとの呼び出しリクエストを保存するリスト
-call_requests = []
-
-# 班と進捗の設定
-NUMBER_OF_GROUPS = 14
-TASKS = ["課題1","課題2"]
-
-# 呼び出し理由のリスト
-CALL_REASONS = ["呼び出し理由1","呼び出し理由2","呼び出し理由3"]
+SECRET_TOKEN = app.config["SECRET_TOKEN"]
+STUDENT_TOKEN = app.config["STUDENT_TOKEN"]
+REMOTE_TOKEN = app.config["REMOTE_TOKEN"]
 
 @app.route('/')
 def index():
