@@ -59,6 +59,11 @@ def interactive_setup():
         "呼び出し理由をカンマ (,) 区切りで入力してください (例: 呼び出し理由1,呼び出し理由2): ").strip()
     call_reasons = reasons_input.split(",") if reasons_input else ["呼び出し理由1", "呼び出し理由2", "呼び出し理由3"]
 
+    # サーバー URL の入力
+    server_url = input("サーバーの URL を入力してください (デフォルト: http://localhost:5000): ").strip()
+    if not server_url:
+        server_url = "http://localhost:5000"
+
     # 入力された設定を辞書に格納
     settings = {
         "SECRET_TOKEN": secret_token,
@@ -68,6 +73,7 @@ def interactive_setup():
         "NUMBER_OF_GROUPS": number_of_groups,
         "TASKS": tasks,
         "CALL_REASONS": call_reasons,
+        "SERVER_URL": server_url,  # 新規追加項目
     }
 
     return settings

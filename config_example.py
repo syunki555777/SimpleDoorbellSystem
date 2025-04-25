@@ -24,3 +24,6 @@ TASKS = ["課題1", "課題2"]
 
 # 呼び出し理由のリスト
 CALL_REASONS = ["呼び出し理由1", "呼び出し理由2", "呼び出し理由3"]
+
+#サーバーのURL
+SERVER_URL = "http://localhost:5000"
