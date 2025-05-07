@@ -10,6 +10,9 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="../static/style.css">
         <script>
+        let isFetchingProgress   = false;
+        let isFetchingCallReq    = false;
+
         function loadMobileCSS() {
             if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
                 var link = document.createElement("link");
@@ -74,6 +77,9 @@
         });
          fetchProgressData()
         function fetchProgressData() {
+             if (isFetchingProgress) return;        // すでに通信中なら何もしない
+            isFetchingProgress = true;
+
             $.ajax({
                 url: "{{ url_for('get_progress') }}",
                 method: "GET",
@@ -105,6 +111,9 @@
         }
 
         function fetchCallRequests() {
+             if (isFetchingCallReq) return;
+             isFetchingCallReq = true;
+
             $.ajax({
                 url: "{{ url_for('get_call_requests') }}",
                 method: "GET",
