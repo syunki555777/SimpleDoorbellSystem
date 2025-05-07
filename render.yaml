@@ -1,0 +1,30 @@
+# render用のBluePrintになります。
+# render でデプロイが可能です。
+services:
+  - type: web
+    name: progress-tracker
+    env: python
+    region: oregon          # 任意
+    plan: free              # Free プランの場合
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "gunicorn app:app --bind 0.0.0.0:$PORT"
+
+    envVars:
+      - key: TITLE
+        value: "進捗管理システム"
+      - key: NUMBER_OF_GROUPS
+        value: "14"
+
+      # JSON 文字列で渡すと config.py 側でパースできます
+      - key: TASKS
+        value: '["課題1", "課題2", "課題3"]'
+      - key: CALL_REASONS
+        value: '["質問", "確認", "ヘルプ"]'
+
+      # トークン類はダッシュボード上で `Generate` しても OK
+      - key: SECRET_TOKEN
+        generateValue: true
+      - key: STUDENT_TOKEN
+        generateValue: true
+      - key: REMOTE_TOKEN
+        generateValue: true

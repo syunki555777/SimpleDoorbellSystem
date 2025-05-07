@@ -1,4 +1,5 @@
-Flask>=2.3          # Web フレームワーク
-reportlab>=4.0      # PDF 生成
-qrcode>=7.4         # QR コード生成
-Pillow>=10.0        # qrcode が内部で利用する画像処理ライブラリ
+Flask>=2.3
+gunicorn>=21.2     # 本番運用用の WSGI サーバ
+reportlab>=4.0
+qrcode>=7.4
+Pillow>=10.0       # qrcode が内部で使用
