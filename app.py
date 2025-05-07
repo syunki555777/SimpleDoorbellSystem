@@ -254,4 +254,20 @@ def download_pdf():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # --- 起動前に必要な情報を表示 ----------------------------
+    host = os.environ.get("FLASK_RUN_HOST", "127.0.0.1")
+    port = int(os.environ.get("FLASK_RUN_PORT", 5000))
+
+    print("=" * 60)
+    print("🚀 Flask アプリを起動します")
+    print(f"🔑 Admin URL: http://{host}:{port}/admin?token={SECRET_TOKEN}")
+    print("\n📋 Config 内容（*TOKEN を除外）")
+    for key, value in app.config.items():
+        if key.endswith("_TOKEN"):
+            continue
+        print(f"  {key}: {value}")
+    print("=" * 60)
+    # ---------------------------------------------------------
+
+    app.run(debug=True, host=host, port=port)
+
