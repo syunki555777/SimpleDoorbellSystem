@@ -83,6 +83,7 @@
             $.ajax({
                 url: "{{ url_for('get_progress') }}",
                 method: "GET",
+                timeout: 10000,
                 success: function(data) {
                     const tasks = {{ tasks | tojson }};
                     for (let group_id = 1; group_id <= {{ num_groups }}; group_id++) {
@@ -107,10 +108,8 @@
                     }
                     attachRevertEventHandlers(); // 必須イベントを再バインド
                 },
-                complete: function() {
-                    isFetchingProgress = false;
-                }
-
+            }).always(function() {
+                isFetchingProgress = false;
             });
         }
 
@@ -121,6 +120,7 @@
             $.ajax({
                 url: "{{ url_for('get_call_requests') }}",
                 method: "GET",
+                timeout: 10000,
                 success: function(data) {
                     const callRequestsDiv = $("#call-requests");
                     callRequestsDiv.empty();
@@ -138,9 +138,8 @@
                     previousCallRequests = data;
                     attachCompleteCallEventHandlers();
                 },
-                complete: function() {
-                    isFetchingCallReq = false;
-                }
+            }).always(function() {
+                isFetchingCallReq = false;
             });
         }
 
@@ -159,7 +158,8 @@
                     },
                     success: function() {
                         fetchProgressData();
-                    }
+                    },
+
                 });
             });
         }
