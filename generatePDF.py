@@ -6,6 +6,8 @@ from reportlab.lib.units import inch
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
 import config  # config.py をインポート
+import textwrap
+
 
 OUTPUT_DIR = "pdf/pdf_output"  # PDF保存先フォルダ
 QR_CODE_DIR = "pdf/qr_codes"  # QRコード画像保存先フォルダ
@@ -15,6 +17,38 @@ IMAGE_PATH = "pdf/image/introduction.png"  # QRコードの下に追加する画
 
 # 日本語フォント登録名
 FONT_NAME = "MPLUSRounded1c"
+
+def draw_centered_wrapped_text(c, text, font_name, font_size,
+                               center_x, start_y, max_width, leading=None):
+    """
+    与えられたテキストをページ中央に折り返して描画するヘルパー関数。
+    戻り値は最後に描画した行のさらに下の Y 座標。
+    """
+    if leading is None:
+        leading = font_size * 1.2  # 行間
+    c.setFont(font_name, font_size)
+
+    # テキストの幅を計測
+    total_width = pdfmetrics.stringWidth(text, font_name, font_size)
+    if total_width <= max_width:
+        c.drawCentredString(center_x, start_y, text)
+        return start_y - leading
+
+    # 折り返し幅（概算文字数）を算出
+    avg_char_width = total_width / len(text)
+    max_chars = max(1, int(max_width / avg_char_width))
+
+    # textwrap で折り返し（単語区切りが無くても強制改行）
+    wrapped_lines = textwrap.wrap(text,
+                                  width=max_chars,
+                                  break_long_words=True,
+                                  break_on_hyphens=False)
+
+    y = start_y
+    for line in wrapped_lines:
+        c.drawCentredString(center_x, y, line)
+        y -= leading
+    return y  # 次に描画するときの Y 座標
 
 
 # PDF作成メイン関数
@@ -116,11 +150,21 @@ def create_group_qr_pdf():
 
     # URL と注意書き
     c.setFont(FONT_NAME, 12)
-    c.drawCentredString(width / 2, y_qr - 0.4 * inch, f"管理者ページ: {admin_url}")
+    max_text_width = width - 2 * inch  # 左右 1 インチを余白として確保
+    next_y = draw_centered_wrapped_text(
+        c,
+        f"管理者ページ: {admin_url}",
+        FONT_NAME,
+        12,
+        width / 2,
+        y_qr - 0.4 * inch,
+        max_text_width
+    )
 
     c.setFont(FONT_NAME, 10)
     warn_text = "※この QR は関係者のみ使用可。外部に共有しないでください。"
-    c.drawCentredString(width / 2, y_qr - 0.8 * inch, warn_text)
+    c.drawCentredString(width / 2, next_y - 0.2 * inch, warn_text)  # URL の直下に表示
+
 
 
 
