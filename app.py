@@ -1,7 +1,18 @@
-from flask import Flask, render_template, request, redirect, url_for, abort, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, abort, jsonify, send_from_directory,send_file, render_template
 import os
 import json
 import config  # config.py をインポート
+import subprocess
+from threading import Thread, Lock
+
+
+PDF_DIR  = os.path.join("pdf", "pdf_output")
+PDF_NAME = "班別QRコード一覧.pdf"
+PDF_PATH = os.path.join(PDF_DIR, PDF_NAME)
+
+_generate_lock = Lock()
+_is_generating = False   # 生成フラグ
+
 app = Flask(__name__)
 
 # 設定を読み込む
@@ -18,6 +29,17 @@ CALL_REASONS = app.config["CALL_REASONS"]
 SECRET_TOKEN = app.config["SECRET_TOKEN"]
 STUDENT_TOKEN = app.config["STUDENT_TOKEN"]
 REMOTE_TOKEN = app.config["REMOTE_TOKEN"]
+
+
+def _background_generate():
+    """
+    別スレッドで PDF を生成し、終了後にフラグを戻す。
+    """
+    global _is_generating
+    try:
+        subprocess.run(["python", "generatePDF.py"], check=True)
+    finally:
+        _is_generating = False
 
 @app.route('/')
 def index():
@@ -201,6 +223,35 @@ def complete_call_request():
 @app.route('/audio/<path:filename>')
 def serve_audio(filename):
     return send_from_directory('audio', filename)
+
+@app.route('/download/pdf', methods=['GET'])
+def download_pdf():
+    """
+    PDF ダウンロードルート:
+    1) 既に PDF があれば即返却
+    2) 無ければ生成開始 → 「生成中」ページを返す
+    3) 生成開始済みなら「生成中」ページのみ返す
+    """
+    global _is_generating
+
+    # 1. 既に PDF が存在する場合
+    if os.path.exists(PDF_PATH):
+        return send_file(
+            PDF_PATH,
+            as_attachment=True,
+            download_name=PDF_NAME,
+            mimetype="application/pdf"
+        )
+
+    # 2. 生成がまだ始まっていなければバックグラウンド生成を開始
+    with _generate_lock:
+        if not _is_generating:
+            _is_generating = True
+            Thread(target=_background_generate, daemon=True).start()
+
+    # 3. 生成中ページを返す
+    return render_template("generating.html")
+
 
 if __name__ == '__main__':
     app.run(debug=True)

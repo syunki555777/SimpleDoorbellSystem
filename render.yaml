@@ -21,6 +21,12 @@ services:
       - key: CALL_REASONS
         value: '["質問", "確認", "ヘルプ"]'
 
+      - key: SERVER_URL
+        fromService:
+          type: web
+          name: progress-tracker       # ↑ 上と同じサービス名
+          property: hostUrl            # ← Render が自動で https://... を注入
+
       # トークン類はダッシュボード上で `Generate` しても OK
       - key: SECRET_TOKEN
         generateValue: true
