@@ -254,7 +254,6 @@ def download_pdf():
 
 
 if __name__ == '__main__':
-    # --- 起動前に必要な情報を表示 ----------------------------
     host = os.environ.get("FLASK_RUN_HOST", "127.0.0.1")
     port = int(os.environ.get("FLASK_RUN_PORT", 5000))
 
@@ -267,7 +266,5 @@ if __name__ == '__main__':
             continue
         print(f"  {key}: {value}")
     print("=" * 60)
-    # ---------------------------------------------------------
-
     app.run(debug=True, host=host, port=port)
 
