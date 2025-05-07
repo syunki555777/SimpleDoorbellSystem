@@ -90,8 +90,39 @@ def create_group_qr_pdf():
 
         c.drawImage(IMAGE_PATH, img_x_position, img_y_position, img_width, img_height)
 
+
+
         # 班ごとに新しいページを追加
         c.showPage()
+
+    # タイトル
+    c.setFont(FONT_NAME, 24)
+    c.drawString(inch, height - inch, "管理者専用ページ (外部公開禁止)")
+
+    # 管理者 URL と QR コード
+    admin_url = f"{config.SERVER_URL}/admin?token={config.SECRET_TOKEN}"
+    admin_qr_img_path = os.path.join(QR_CODE_DIR, "admin.png")
+    admin_qr = qrcode.QRCode(version=1, box_size=10, border=4)
+    admin_qr.add_data(admin_url)
+    admin_qr.make(fit=True)
+    admin_qr_img = admin_qr.make_image(fill="black", back_color="white")
+    admin_qr_img.save(admin_qr_img_path)
+
+    # QR を中央配置
+    qr_size = 4 * inch
+    x_qr = (width - qr_size) / 2
+    y_qr = height - 2 * inch - qr_size
+    c.drawImage(admin_qr_img_path, x_qr, y_qr, qr_size, qr_size)
+
+    # URL と注意書き
+    c.setFont(FONT_NAME, 12)
+    c.drawCentredString(width / 2, y_qr - 0.4 * inch, f"管理者ページ: {admin_url}")
+
+    c.setFont(FONT_NAME, 10)
+    warn_text = "※この QR は関係者のみ使用可。外部に共有しないでください。"
+    c.drawCentredString(width / 2, y_qr - 0.8 * inch, warn_text)
+
+
 
     # PDFファイルを保存
     c.save()
