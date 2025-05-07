@@ -17,12 +17,8 @@ services:
       - key: CALL_REASONS
         value: '["質問", "確認", "ヘルプ"]'
 
-      # ← 修正: property を host に変更
       - key: SERVER_HOST
-        fromService:
-          type: web
-          name: progress-tracker
-          property: host
+        value: 'http://127.0.0.1'
 
       - key: SECRET_TOKEN
         generateValue: true
