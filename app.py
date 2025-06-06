@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, abort, jsonify, send_from_directory,send_file, render_template
+from flask import Flask, render_template, request, redirect, url_for, abort, jsonify, send_from_directory, send_file
 import os
 import json
 import config  # config.py をインポート
@@ -75,7 +75,7 @@ def confirm_task(group_id, task):
 
 @app.route('/confirm_call/<int:group_id>/<reason>', methods=['GET', 'POST'])
 def confirm_call(group_id, reason):
-    token = request.args.get('token')
+    token = request.values.get('token')  # Accept token from query or form
     if token != STUDENT_TOKEN:
         abort(403)  # Forbidden
     if request.method == 'POST':
