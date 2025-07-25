@@ -93,6 +93,11 @@ def save_to_config_file(settings):
             else:
                 # その他の型 (整数など)
                 f.write(f"{key} = {value}\n")
+        f.write(f"\n\n")
+        f.write(f"# 班ごとの進捗を保存するデフォルト辞書\n"
+                    "PROGRESS_DATA = {}\n"
+                    "# 班ごとの呼び出しリクエストを保存するリスト\n"
+                    "CALL_REQUESTS = []\n")
     print(f"\n設定を {CONFIG_FILE} に保存しました！")
 
 
